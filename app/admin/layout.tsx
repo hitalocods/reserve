@@ -54,9 +54,12 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-neutral-100 flex flex-col">
         <div className="p-6 border-b border-neutral-100">
-          <div className="flex items-center gap-2">
-            <Scissors className="w-6 h-6 text-black" />
-            <span className="text-xl font-black uppercase tracking-tight">Admin</span>
+          <div className="flex items-center gap-3">
+            <img src="/logo.jpg" alt="Atlas Reserve" className="h-9 w-auto rounded-lg object-contain border border-neutral-800" />
+            <div>
+              <span className="text-sm font-black uppercase tracking-tight block leading-tight">Atlas Reserve</span>
+              <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest block">Admin</span>
+            </div>
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-2">

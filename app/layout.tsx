@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Barbearia Premium",
-  description: "Sistema de gestão para barbearias premium",
+  title: "Atlas Reserve",
+  description: "Sistema de agendamento e gestão para Atlas Reserve",
 };
 
 export default function RootLayout({

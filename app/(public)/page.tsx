@@ -53,9 +53,9 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="border-b border-neutral-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Scissors className="w-6 h-6 text-black" />
-            <span className="text-xl font-black tracking-tight uppercase">Barbearia Premium</span>
+          <div className="flex items-center gap-3">
+            <img src="/logo.jpg" alt="Atlas Reserve" className="h-10 w-auto rounded-lg object-contain border border-neutral-800" />
+            <span className="text-xl font-black tracking-tight uppercase">Atlas Reserve</span>
           </div>
           <div className="hidden md:flex gap-8 text-sm font-semibold text-neutral-600">
             <a href="#servicos" className="hover:text-black transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:scale-x-0 after:bg-black after:transition-transform after:duration-300 hover:after:scale-x-100">Serviços</a>
@@ -113,7 +113,7 @@ export default function LandingPage() {
           <div className="absolute -top-4 -left-4 w-full h-full border-2 border-black rounded-3xl -z-10 hidden sm:block"></div>
           <img
             src="https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=premium%20barbershop%20hero%20image%20clean%20minimal%20white%20black%20gold&image_size=square"
-            alt="Barbearia Premium"
+            alt="Atlas Reserve"
             className="relative rounded-3xl shadow-xl w-full object-cover aspect-square hover:scale-[1.02] transition-transform duration-500 border border-neutral-100"
           />
         </motion.div>
@@ -269,12 +269,12 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-black text-white py-12 border-t border-neutral-900">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Scissors className="w-6 h-6 text-white" />
-            <span className="text-xl font-black uppercase tracking-tight">Barbearia Premium</span>
+          <div className="flex items-center gap-3">
+            <img src="/logo.jpg" alt="Atlas Reserve" className="h-10 w-auto rounded-lg object-contain border border-neutral-800" />
+            <span className="text-xl font-black uppercase tracking-tight">Atlas Reserve</span>
           </div>
           <p className="text-neutral-500 text-sm font-medium">
-            © 2026 Barbearia Premium. Todos os direitos reservados.
+            © 2026 Atlas Reserve. Todos os direitos reservados.
           </p>
         </div>
       </footer>

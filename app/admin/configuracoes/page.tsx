@@ -13,7 +13,7 @@ export default function AdminConfiguracoesPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-2">Nome da Barbearia</label>
-              <input type="text" defaultValue="Barbearia Premium" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
+              <input type="text" defaultValue="Atlas Reserve" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">WhatsApp</label>
@@ -21,7 +21,7 @@ export default function AdminConfiguracoesPage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Instagram</label>
-              <input type="text" defaultValue="@barbeariapremium" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
+              <input type="text" defaultValue="@atlasreserve" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Endereço</label>

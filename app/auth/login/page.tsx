@@ -26,9 +26,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold mb-2">Painel Administrativo</h1>
-          <p className="text-gray-600">Barbearia Premium</p>
+        <div className="text-center mb-10 flex flex-col items-center">
+          <img src="/logo.jpg" alt="Atlas Reserve" className="h-20 w-auto mb-4 rounded-xl shadow-md border border-neutral-800" />
+          <h1 className="text-3xl font-bold mb-1">Painel Administrativo</h1>
+          <p className="text-neutral-500 font-medium">Atlas Reserve</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
