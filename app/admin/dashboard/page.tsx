@@ -40,7 +40,8 @@ interface Expense {
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<"day" | "week" | "month" | "all">("month");
+  const [period, setPeriod] = useState<"day" | "week" | "month" | "all" | "custom">("month");
+  const [customDate, setCustomDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
@@ -79,7 +80,14 @@ export default function DashboardPage() {
     const itemDate = new Date(dateStr);
     const now = new Date();
 
-    if (period === "day") {
+    if (period === "custom" && customDate) {
+      const selected = new Date(customDate + "T00:00:00");
+      return (
+        itemDate.getFullYear() === selected.getFullYear() &&
+        itemDate.getMonth() === selected.getMonth() &&
+        itemDate.getDate() === selected.getDate()
+      );
+    } else if (period === "day") {
       return itemDate.toDateString() === now.toDateString();
     } else if (period === "week") {
       const oneWeekAgo = new Date();
@@ -172,40 +180,59 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Period Selector Tabs */}
-        <div className="flex bg-gray-200/70 p-1 rounded-2xl self-start sm:self-auto text-xs font-bold">
-          <button
-            onClick={() => setPeriod("day")}
-            className={`px-3 py-1.5 rounded-xl transition-all ${
-              period === "day" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-            }`}
-          >
-            Diário
-          </button>
-          <button
-            onClick={() => setPeriod("week")}
-            className={`px-3 py-1.5 rounded-xl transition-all ${
-              period === "week" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-            }`}
-          >
-            Semanal
-          </button>
-          <button
-            onClick={() => setPeriod("month")}
-            className={`px-3 py-1.5 rounded-xl transition-all ${
-              period === "month" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-            }`}
-          >
-            Mensal
-          </button>
-          <button
-            onClick={() => setPeriod("all")}
-            className={`px-3 py-1.5 rounded-xl transition-all ${
-              period === "all" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-            }`}
-          >
-            Geral
-          </button>
+        {/* Period Selector Tabs & Custom Date Picker */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex bg-gray-200/70 p-1 rounded-2xl text-xs font-bold">
+            <button
+              onClick={() => setPeriod("day")}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                period === "day" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
+              }`}
+            >
+              Diário
+            </button>
+            <button
+              onClick={() => setPeriod("week")}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                period === "week" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
+              }`}
+            >
+              Semanal
+            </button>
+            <button
+              onClick={() => setPeriod("month")}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                period === "month" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              onClick={() => setPeriod("all")}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                period === "all" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
+              }`}
+            >
+              Geral
+            </button>
+            <button
+              onClick={() => setPeriod("custom")}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                period === "custom" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
+              }`}
+            >
+              Data Específica
+            </button>
+          </div>
+
+          {period === "custom" && (
+            <input
+              type="date"
+              value={customDate}
+              onChange={(e) => setCustomDate(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-xl text-xs font-bold bg-white text-black shadow-sm focus:outline-none focus:border-black"
+            />
+          )}
         </div>
       </div>
 
