@@ -83,7 +83,7 @@ export default function AdminConfiguracoesPage() {
       });
 
       if (res.ok) {
-        alert("Configurações salvas com sucesso no banco de dados!");
+        alert("Configurações salvas com sucesso!");
       } else {
         alert("Erro ao salvar configurações");
       }
@@ -96,74 +96,76 @@ export default function AdminConfiguracoesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12 bg-white rounded-2xl border border-gray-100">
+      <div className="flex items-center justify-center p-12 bg-white rounded-3xl border border-gray-100 min-h-[300px]">
         <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Configurações</h1>
-        <p className="text-gray-600">Personalize as informações e marca da barbearia</p>
+    <div className="space-y-6 pb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Configurações</h1>
+          <p className="text-sm text-gray-500 font-medium mt-1">Personalize as informações e marca da barbearia</p>
+        </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Informações Básicas */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold mb-6">Informações Básicas</h2>
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-6">Informações Básicas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Nome da Barbearia</label>
+              <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Nome da Barbearia</label>
               <input
                 type="text"
                 value={settings.shopName}
                 onChange={(e) => setSettings({ ...settings, shopName: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-black text-sm font-medium"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">WhatsApp</label>
+              <label className="block text-xs font-bold uppercase text-gray-600 mb-1">WhatsApp</label>
               <input
                 type="tel"
                 value={settings.whatsapp}
                 onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-black text-sm font-medium"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Instagram</label>
+              <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Instagram</label>
               <input
                 type="text"
                 value={settings.instagram}
                 onChange={(e) => setSettings({ ...settings, instagram: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-black text-sm font-medium"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Endereço Completo</label>
+              <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Endereço Completo</label>
               <input
                 type="text"
                 value={settings.address}
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-black text-sm font-medium"
               />
             </div>
           </div>
         </div>
 
         {/* Identidade Visual & Logo */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold mb-6">Identidade Visual & Logo</h2>
-          <div className="grid md:grid-cols-2 gap-6 items-center">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-6">Identidade Visual & Logo</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <div>
-              <label className="block text-sm font-medium mb-2">Logo Oficial (Vercel Blob)</label>
+              <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Logo Oficial</label>
               <div className="flex items-center gap-4">
-                <img src={settings.logoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-contain border border-gray-200 bg-black p-1" />
-                <label className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl cursor-pointer text-sm font-medium text-gray-700 transition-colors">
+                <img src={settings.logoUrl} alt="Logo" className="w-16 h-16 rounded-2xl object-contain border border-gray-200 bg-black p-1" />
+                <label className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-2xl cursor-pointer text-xs font-bold text-gray-700 transition-colors">
                   {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                   {uploading ? "Enviando..." : "Alterar Logo"}
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
@@ -172,12 +174,12 @@ export default function AdminConfiguracoesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Texto Destaque (Hero)</label>
+              <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Texto Destaque (Hero)</label>
               <input
                 type="text"
                 value={settings.landingText}
                 onChange={(e) => setSettings({ ...settings, landingText: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-black text-sm font-medium"
               />
             </div>
           </div>
@@ -188,7 +190,7 @@ export default function AdminConfiguracoesPage() {
           <button
             type="submit"
             disabled={saving || uploading}
-            className="flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm disabled:opacity-50"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-black text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-neutral-800 transition-all shadow-md active:scale-95 text-sm disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {saving ? "Salvando..." : "Salvar Alterações"}

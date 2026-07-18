@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Clock,
 } from "lucide-react";
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin/agenda", label: "Agenda", icon: CalendarDays },
   { href: "/admin/servicos", label: "Serviços", icon: Scissors },
   { href: "/admin/barbeiros", label: "Barbeiros", icon: Users },
+  { href: "/admin/horarios", label: "Horários", icon: Clock },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
