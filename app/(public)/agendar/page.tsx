@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ServiceItem {
@@ -10,7 +10,7 @@ interface ServiceItem {
   name: string;
   price: number;
   duration: number;
-  imageUrl: string;
+  imageUrl: string | null;
 }
 
 interface BarberItem {
@@ -18,30 +18,17 @@ interface BarberItem {
   name: string;
   slug: string;
   specialty: string;
-  photoUrl: string;
+  photoUrl: string | null;
   color: string;
   workDays: string[];
   startTime: string;
   endTime: string;
 }
 
-// Mock data for now
-const services = [
-  { id: "1", name: "Corte Clássico", price: 45, duration: 30, imageUrl: "https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=barbershop%20haircut%20in%20premium%20salon%20clean%20white%20black%20gold%20minimal&image_size=square" },
-  { id: "2", name: "Barba Completa", price: 35, duration: 20, imageUrl: "https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=premium%20beard%20trim%20barbershop%20clean%20white%20black%20gold&image_size=square" },
-  { id: "3", name: "Corte + Barba", price: 70, duration: 50, imageUrl: "https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=barber%20cutting%20hair%20and%20trimming%20beard%20premium&image_size=square" },
-];
-
-const barbers = [
-  { id: "1", name: "João Silva", slug: "joao-silva", specialty: "Cortes Clássicos", photoUrl: "https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20barber%20man%20portrait%20clean%20minimal&image_size=square", color: "#D4AF37", workDays: ["seg", "ter", "qua", "qui", "sex"], startTime: "09:00", endTime: "19:00" },
-  { id: "2", name: "Pedro Santos", slug: "pedro-santos", specialty: "Barbas Modernas", photoUrl: "https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20barber%20man%20portrait%20modern%20style&image_size=square", color: "#333333", workDays: ["seg", "ter", "qua", "qui", "sex", "sáb"], startTime: "10:00", endTime: "20:00" },
-];
-
-// Generate time slots
 function generateTimeSlots(startTime: string, endTime: string, duration: number) {
   const slots = [];
-  let [startHour, startMinute] = startTime.split(":").map(Number);
-  let [endHour, endMinute] = endTime.split(":").map(Number);
+  let [startHour, startMinute] = (startTime || "09:00").split(":").map(Number);
+  let [endHour, endMinute] = (endTime || "19:00").split(":").map(Number);
 
   let totalStartMinutes = startHour * 60 + startMinute;
   const totalEndMinutes = endHour * 60 + endMinute - duration;
@@ -58,12 +45,41 @@ function generateTimeSlots(startTime: string, endTime: string, duration: number)
 
 export default function BookingPage() {
   const [step, setStep] = useState(1);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [barbers, setBarbers] = useState<BarberItem[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [selectedBarber, setSelectedBarber] = useState<BarberItem | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        setLoadingData(true);
+        const [resServ, resBarb] = await Promise.all([
+          fetch("/api/services"),
+          fetch("/api/barbers"),
+        ]);
+        if (resServ.ok && resBarb.ok) {
+          const dataServ = await resServ.json();
+          const dataBarb = await resBarb.json();
+          setServices(dataServ);
+          setBarbers(dataBarb);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do banco:", err);
+      } finally {
+        setLoadingData(false);
+      }
+    }
+    loadInitialData();
+  }, []);
 
   const handleNextStep = () => {
     if (step < 5) setStep(step + 1);
@@ -73,24 +89,51 @@ export default function BookingPage() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedService || !selectedBarber || !selectedDate || !selectedTime || !customerName || !customerPhone) return;
 
-    const message = encodeURIComponent(
-      `Olá! Gostaria de confirmar meu agendamento:\n\n` +
-      `Nome: ${customerName}\n` +
-      `Telefone: ${customerPhone}\n` +
-      `Serviço: ${selectedService.name}\n` +
-      `Barbeiro: ${selectedBarber.name}\n` +
-      `Data: ${selectedDate}\n` +
-      `Horário: ${selectedTime}\n\n` +
-      `Aguardo confirmação!`
-    );
+    try {
+      setSubmitting(true);
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          barberId: selectedBarber.id,
+          serviceId: selectedService.id,
+          customerName,
+          customerPhone,
+          date: selectedDate,
+          startTime: selectedTime,
+        }),
+      });
 
-    window.open(`https://wa.me/5511999999999?text=${message}`, "_blank");
+      if (!res.ok) {
+        const err = await res.json();
+        alert("Erro ao realizar agendamento: " + (err.error || "Tente novamente"));
+        return;
+      }
+
+      setSuccess(true);
+
+      // Optionally open WhatsApp
+      const message = encodeURIComponent(
+        `Olá! Agendei pelo site Atlas Reserve:\n\n` +
+        `Nome: ${customerName}\n` +
+        `Telefone: ${customerPhone}\n` +
+        `Serviço: ${selectedService.name}\n` +
+        `Barbeiro: ${selectedBarber.name}\n` +
+        `Data: ${selectedDate}\n` +
+        `Horário: ${selectedTime}\n\n` +
+        `Confirmação enviada pelo sistema.`
+      );
+      window.open(`https://wa.me/5511999999999?text=${message}`, "_blank");
+    } catch (err: any) {
+      alert("Erro de conexão: " + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Generate next 14 days for date picker
   const dates = [];
   for (let i = 0; i < 14; i++) {
     const date = new Date();
@@ -98,10 +141,46 @@ export default function BookingPage() {
     dates.push(date.toISOString().split("T")[0]);
   }
 
+  if (loadingData) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-white py-16 px-4 flex items-center justify-center">
+        <div className="max-w-md w-full text-center bg-neutral-50 rounded-3xl p-8 border border-neutral-100 shadow-lg">
+          <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check className="w-8 h-8" />
+          </div>
+          <h1 className="text-3xl font-black uppercase tracking-tight mb-2">Agendamento Confirmado!</h1>
+          <p className="text-neutral-500 mb-6 font-medium">
+            Seu agendamento foi registrado com sucesso no banco de dados.
+          </p>
+          <div className="bg-white p-4 rounded-2xl border border-neutral-200 text-left space-y-2 text-sm mb-8">
+            <p><strong>Cliente:</strong> {customerName}</p>
+            <p><strong>Barbeiro:</strong> {selectedBarber?.name}</p>
+            <p><strong>Serviço:</strong> {selectedService?.name}</p>
+            <p><strong>Data/Hora:</strong> {selectedDate} às {selectedTime}</p>
+          </div>
+          <Link
+            href="/"
+            className="inline-block w-full bg-black text-white py-3.5 rounded-full font-bold hover:bg-neutral-800 transition-colors"
+          >
+            Voltar para a Página Inicial
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-black mb-8">
+        <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-black mb-8 font-medium">
           <ArrowLeft className="w-4 h-4" />
           Voltar para Home
         </Link>
@@ -110,19 +189,23 @@ export default function BookingPage() {
         <div className="flex items-center justify-between mb-12 max-w-lg mx-auto">
           {[1, 2, 3, 4, 5].map((num) => (
             <div key={num} className="flex items-center flex-1 last:flex-none">
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-bold transition-all duration-300 ${
-                num < step
-                  ? "bg-black text-white"
-                  : num === step
-                  ? "bg-black text-white ring-2 ring-offset-2 ring-black"
-                  : "bg-neutral-100 text-neutral-400"
-              }`}>
+              <div
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-bold transition-all duration-300 ${
+                  num < step
+                    ? "bg-black text-white"
+                    : num === step
+                    ? "bg-black text-white ring-2 ring-offset-2 ring-black"
+                    : "bg-neutral-100 text-neutral-400"
+                }`}
+              >
                 {num < step ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : num}
               </div>
               {num < 5 && (
-                <div className={`flex-1 h-[2px] mx-1 sm:mx-2 transition-all duration-300 ${
-                  num < step ? "bg-black" : "bg-neutral-200"
-                }`} />
+                <div
+                  className={`flex-1 h-[2px] mx-1 sm:mx-2 transition-all duration-300 ${
+                    num < step ? "bg-black" : "bg-neutral-200"
+                  }`}
+                />
               )}
             </div>
           ))}
@@ -182,6 +265,7 @@ export default function BookingPage() {
                 onPhoneChange={setCustomerPhone}
                 onSubmit={handleSubmit}
                 onPrev={handlePrevStep}
+                submitting={submitting}
                 booking={{
                   service: selectedService!,
                   barber: selectedBarber!,
@@ -268,11 +352,17 @@ function Step2({
                 : "border-neutral-200 hover:border-neutral-400"
             }`}
           >
-            <img
-              src={barber.photoUrl}
-              alt={barber.name}
-              className="w-20 h-20 rounded-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
-            />
+            {barber.photoUrl ? (
+              <img
+                src={barber.photoUrl}
+                alt={barber.name}
+                className="w-16 h-16 rounded-full object-cover border border-neutral-200"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center font-bold text-xl">
+                {barber.name.charAt(0)}
+              </div>
+            )}
             <div className="flex-1">
               <h3 className="font-bold text-lg tracking-tight">{barber.name}</h3>
               <p className="text-neutral-500 text-sm font-medium">{barber.specialty}</p>
@@ -428,6 +518,7 @@ function Step5({
   onPhoneChange,
   onSubmit,
   onPrev,
+  submitting,
   booking,
 }: {
   customerName: string;
@@ -436,13 +527,13 @@ function Step5({
   onPhoneChange: (phone: string) => void;
   onSubmit: () => void;
   onPrev: () => void;
+  submitting: boolean;
   booking: { service: ServiceItem; barber: BarberItem; date: string; time: string };
 }) {
   return (
     <div>
       <h2 className="text-3xl font-black uppercase tracking-tight mb-8">Seus Dados</h2>
 
-      {/* Booking Summary */}
       <div className="bg-neutral-50 rounded-2xl p-6 mb-8 border border-neutral-100">
         <h3 className="font-bold text-lg tracking-tight mb-4 uppercase">Resumo do Agendamento</h3>
         <div className="space-y-3 text-sm">
@@ -469,26 +560,25 @@ function Step5({
         </div>
       </div>
 
-      {/* Form */}
       <div className="space-y-4 mb-8">
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wide">Nome</label>
+          <label className="block text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wide">Nome Completo</label>
           <input
             type="text"
             value={customerName}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="Seu nome completo"
-            className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black font-medium transition-all"
+            className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-black font-medium transition-all"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wide">Telefone</label>
+          <label className="block text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wide">Telefone / WhatsApp</label>
           <input
             type="tel"
             value={customerPhone}
             onChange={(e) => onPhoneChange(e.target.value)}
             placeholder="(11) 99999-9999"
-            className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black font-medium transition-all"
+            className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-black font-medium transition-all"
           />
         </div>
       </div>
@@ -502,10 +592,11 @@ function Step5({
         </button>
         <button
           onClick={onSubmit}
-          disabled={!customerName || !customerPhone}
-          className="flex-1 bg-black text-white border border-black py-4 rounded-full font-bold disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white disabled:cursor-not-allowed hover:bg-white hover:text-black transition-all duration-300"
+          disabled={!customerName || !customerPhone || submitting}
+          className="flex-1 bg-black text-white border border-black py-4 rounded-full font-bold disabled:opacity-30 flex items-center justify-center gap-2 hover:bg-white hover:text-black transition-all duration-300"
         >
-          Confirmar via WhatsApp
+          {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          {submitting ? "Finalizando..." : "Confirmar Agendamento"}
         </button>
       </div>
     </div>
