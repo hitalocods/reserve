@@ -240,6 +240,7 @@ export default function BookingPage() {
             {step === 3 && (
               <Step3
                 dates={dates}
+                selectedBarber={selectedBarber}
                 selectedDate={selectedDate}
                 onSelect={setSelectedDate}
                 onNext={handleNextStep}
@@ -391,12 +392,14 @@ function Step2({
 
 function Step3({
   dates,
+  selectedBarber,
   selectedDate,
   onSelect,
   onNext,
   onPrev,
 }: {
   dates: string[];
+  selectedBarber: BarberItem | null;
   selectedDate: string | null;
   onSelect: (date: string) => void;
   onNext: () => void;
@@ -407,6 +410,7 @@ function Step3({
     const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
     const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     return {
+      weekdayNum: date.getDay().toString(),
       weekday: dayNames[date.getDay()],
       day: date.getDate().toString().padStart(2, "0"),
       month: monthNames[date.getMonth()],
@@ -418,20 +422,29 @@ function Step3({
       <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-6">Escolha a Data</h2>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 mb-8">
         {dates.map((date) => {
-          const { weekday, day, month } = formatDate(date);
+          const { weekdayNum, weekday, day, month } = formatDate(date);
+          const isWorkingDay = selectedBarber?.workDays
+            ? selectedBarber.workDays.includes(weekdayNum)
+            : true;
+
           return (
             <button
               key={date}
-              onClick={() => onSelect(date)}
+              disabled={!isWorkingDay}
+              onClick={() => isWorkingDay && onSelect(date)}
               className={`p-2 sm:p-3 border-2 rounded-xl text-center transition-all ${
-                selectedDate === date
+                !isWorkingDay
+                  ? "opacity-30 border-neutral-200 bg-neutral-100 cursor-not-allowed"
+                  : selectedDate === date
                   ? "border-black bg-black text-white shadow-sm"
                   : "border-neutral-200 hover:border-neutral-400 bg-white text-neutral-900"
               }`}
             >
-              <div className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${selectedDate === date ? "text-neutral-300" : "text-neutral-400"}`}>{weekday}</div>
+              <div className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${!isWorkingDay ? "text-neutral-400" : selectedDate === date ? "text-neutral-300" : "text-neutral-400"}`}>{weekday}</div>
               <div className="text-base sm:text-xl font-black my-0.5">{day}</div>
-              <div className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${selectedDate === date ? "text-neutral-300" : "text-neutral-400"}`}>{month}</div>
+              <div className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${!isWorkingDay ? "text-neutral-400" : selectedDate === date ? "text-neutral-300" : "text-neutral-400"}`}>
+                {isWorkingDay ? month : "Folga"}
+              </div>
             </button>
           );
         })}
